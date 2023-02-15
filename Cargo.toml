@@ -14,7 +14,7 @@ chrono = "0.4.23"
 csv = "1.2.0"
 reqwest = { version = "0.11.4", features = ["blocking"] }
 scraper = "0.14.0"
-serde = "1.0.152"
+serde = { version = "1.0.152", features = ["derive"] }
 
 [dev-dependencies]
 cargo-update = "11.1.1"
