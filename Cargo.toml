@@ -1,0 +1,21 @@
+[package]
+name = "power_scraper"
+version = "0.1.0"
+edition = "2021"
+description = "A simple web scraper built in Rust"
+authors = ["Rngsus"]
+documentation = "https://github.com/younesbram/power_scraper/blob/main/README.md"
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.23"
+csv = "1.2.0"
+reqwest = { version = "0.11.4", features = ["blocking"] }
+scraper = "0.14.0"
+serde = "1.0.152"
+
+[dev-dependencies]
+cargo-update = "11.1.1"
+clippy = "0.0.302"
