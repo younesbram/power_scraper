@@ -2,7 +2,7 @@ use scraper::{Html, Selector};
 use reqwest::blocking::get;
 use serde::Serialize;
 use std::fs::File;
-use chrono::{Local, Timelike, Datelike};
+use chrono::{Local, Datelike};
 
 // Define a struct to hold the table data
 #[derive(Debug)]
@@ -25,11 +25,8 @@ struct TableDataCSV {
     data: Vec<Record>,
 }
 
-/// Sends a GET request to the specified URL and returns the response body as a `String`.
+/// Constructs the URL with the latest date and sends a GET request to the specified URL. Returns the response body as a `String`.
 /// 
-/// # Arguments
-///
-/// * `url` - A string slice that holds the URL to send the GET request to.
 ///
 /// # Errors
 ///
@@ -42,9 +39,13 @@ struct TableDataCSV {
 /// let body = fetch_data(url).unwrap();
 /// println!("{}", body);
 /// ```
-fn fetch_data(url: &str) -> Result<String, Box<dyn std::error::Error>> {
+fn fetch_data() -> Result<String, Box<dyn std::error::Error>> {
+    let now = Local::now();
+    let date = format!("{:04}{:02}{:02}", now.year(), now.month(), now.day());
+
     // Make a GET request to the URL
-    let body = get(url)?.text()?;
+    let url = format!("https://www.ercot.com/content/cdr/html/{}_dam_spp.html", date);
+    let body = get(&url)?.text()?;
     Ok(body)
 }
 
@@ -151,9 +152,7 @@ fn save_data_csv(data: &TableData) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let url = "https://www.ercot.com/content/cdr/html/20230214_dam_spp.html";
-
-    let body = fetch_data(url)?;
+    let body = fetch_data()?;
     let table_data = parse_data(&body)?;
 
     save_data_csv(&table_data)?;
