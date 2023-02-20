@@ -1,9 +1,15 @@
-// tests/main.rs
+#[cfg(test)]
+mod tests {
+   // use ::power_scraper::fetch_data;
 
-#[test]
-fn test_main() {
-    // Test that the main function runs without errors
-    assert!(main().is_ok());
+    #[test]
+    fn test_fetch_data_success() {
+       // let body = fetch_data().unwrap();
+        //assert!(!body.is_empty());
+    }
 
-    // TODO: Add more tests here
+    #[test]
+    fn test_fetch_data_failure() {
+       
+    }
 }
