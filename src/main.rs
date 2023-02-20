@@ -2,6 +2,7 @@ use scraper::{Html, Selector};
 use reqwest::blocking::get;
 use serde::Serialize;
 use std::fs::File;
+use chrono::{Local, Timelike, Datelike};
 
 // Define a struct to hold the table data
 #[derive(Debug)]
@@ -24,20 +25,51 @@ struct TableDataCSV {
     data: Vec<Record>,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// Sends a GET request to the specified URL and returns the response body as a `String`.
+/// 
+/// # Arguments
+///
+/// * `url` - A string slice that holds the URL to send the GET request to.
+///
+/// # Errors
+///
+/// This function will return an error if the GET request fails or if there is an issue with the response body.
+///
+/// # Examples
+///
+/// ```
+/// let url = "https://www.example.com";
+/// let body = fetch_data(url).unwrap();
+/// println!("{}", body);
+/// ```
+fn fetch_data(url: &str) -> Result<String, Box<dyn std::error::Error>> {
     // Make a GET request to the URL
-    let url = "https://www.ercot.com/content/cdr/html/20230214_dam_spp.html";
     let body = get(url)?.text()?;
-    //println!("{}", body);
+    Ok(body)
+}
 
+/// Parses the HTML body and extracts the desired data.
+///
+/// # Arguments
+///
+/// * `body` - A reference to a string containing the HTML body to parse
+///
+/// # Errors
+///
+/// Returns an error if there is an issue parsing the HTML or converting the text to a numerical format.
+///
+/// # Examples
+///
+/// ```
+/// let body = "<html>...</html>";
+/// let table_data = parse_data(&body).unwrap();
+/// ```
+///
+fn parse_data(body: &str) -> Result<TableData, Box<dyn std::error::Error>> {
     // Parse the HTML
     let document = Html::parse_document(&body);
-    //println!("{:#?}", document);
-    
     // Define a CSS selector for the table rows
     let row_selector = Selector::parse("table.tableStyle tr").unwrap();
-
-    //rust compiler let me know theres no need for this but for future need ; let date_selector = Selector::parse("td:nth-child(1)").unwrap();
 
     // Define CSS selectors for the desired table cells based on their position in the table structure.
     // This is done using the nth-child selector in combination with the td tag. While it's possible to
@@ -82,6 +114,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             lz_west.push(text.parse().unwrap());
         }
     }
+
     // Create the struct with the extracted data
     let table_data = TableData {
         lz_houston,
@@ -90,20 +123,40 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         lz_west,
     };
 
+    Ok(table_data)
+}
+
+/// Saves the table data as a CSV file with the filename `powerfullyScraped.csv`.
+///
+/// # Arguments
+///
+/// * `data` - A reference to the `TableData` struct containing the table data to be saved.
+///
+/// # Errors
+///
+/// Returns an error if there is a problem creating or writing to the file.
+fn save_data_csv(data: &TableData) -> Result<(), Box<dyn std::error::Error>> {
     let mut writer = csv::Writer::from_writer(File::create("powerfullyScraped.csv")?);
     writer.write_record(&["LZ Houston", "LZ North", "LZ South", "LZ West"])?;
     
-    for i in 0..table_data.lz_houston.len() {
-        writer.write_record(&[        table_data.lz_houston[i].to_string(),
-            table_data.lz_north[i].to_string(),
-            table_data.lz_south[i].to_string(),
-            table_data.lz_west[i].to_string(),
+    for i in 0..data.lz_houston.len() {
+        writer.write_record(&[        
+            data.lz_houston[i].to_string(),
+            data.lz_north[i].to_string(),
+            data.lz_south[i].to_string(),
+            data.lz_west[i].to_string(),
         ])?;
     }
 
-    // Print the struct for testing purposes
-    //println!("{:#?}", table_data);
-    //println!("Table data for {}:\n{:#?}", &table_data.lz_houston.len(), table_data);
+    Ok(())
+}
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let url = "https://www.ercot.com/content/cdr/html/20230214_dam_spp.html";
+
+    let body = fetch_data(url)?;
+    let table_data = parse_data(&body)?;
+
+    save_data_csv(&table_data)?;
 
     Ok(())
 }

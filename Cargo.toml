@@ -8,7 +8,7 @@ documentation = "https://github.com/younesbram/power_scraper/blob/main/README.md
 readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
+# to find version : cargo search / cargo update --all
 [dependencies]
 chrono = "0.4.23"
 csv = "1.2.0"
@@ -19,3 +19,5 @@ serde = { version = "1.0.152", features = ["derive"] }
 [dev-dependencies]
 cargo-update = "11.1.1"
 clippy = "0.0.302"
+
+# [[bin]]
